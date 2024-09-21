@@ -38,6 +38,9 @@
 /* USER CODE BEGIN PD */
 #define ON 1
 #define OFF 2
+#define RED 3
+#define GREEN 4
+#define YELLOW 5
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -63,11 +66,14 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int c0 = 0;
-int c1 = 1;
-int c2 = 2;
+int c1 = 0;
+int c2 = 0;
+int cnt = 0;
 
 uint8_t state_y0;
 uint8_t state_y1;
+uint8_t traffic_light;
+
 
 void debug_led(){
 	c0 = (c0 + 1)%40;
@@ -127,17 +133,35 @@ void q1(){
 }
 
 void q2(){
-	if (cnt == 5){
-		HAL_GPIO_TogglePin(led_GPIO_Port, led_Pin);	//red off
-		HAL_GPIO_TogglePin(y0_GPIO_Port, y0_Pin); //green on
-	}else if (cnt == 8){
-		HAL_GPIO_TogglePin(y0_GPIO_Port, y0_Pin); //green off
-		HAL_GPIO_TogglePin(y1_GPIO_Port, y1_Pin); //y on
-	}else if (cnt == 9){
-		HAL_GPIO_TogglePin(y1_GPIO_Port, y1_Pin);
-		HAL_GPIO_TogglePin(led_GPIO_Port, led_Pin);
-		cnt=0;
-	}cnt++;
+	switch(traffic_light){
+	case RED:
+		cnt = (cnt+1)%100;
+		if (cnt == 0){
+			traffic_light = GREEN;
+			HAL_GPIO_TogglePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin);	//red off
+			HAL_GPIO_TogglePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y0_Pin); //green on
+		}break;
+	case GREEN:
+		cnt = (cnt+1)%60;
+		if (cnt == 0){
+			traffic_light = YELLOW;
+			HAL_GPIO_TogglePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y0_Pin); //green off
+			HAL_GPIO_TogglePin(OUTPUT_Y1_GPIO_Port, OUTPUT_Y1_Pin); //y on
+		}break;
+	case YELLOW:
+		cnt = (cnt+1)%20;
+		if (cnt == 0){
+			traffic_light = RED;
+			HAL_GPIO_TogglePin(OUTPUT_Y1_GPIO_Port, OUTPUT_Y1_Pin);
+			HAL_GPIO_TogglePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin);
+		}break;
+	default:
+		HAL_GPIO_WritePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin, 1);
+		HAL_GPIO_WritePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y0_Pin, 0);
+		HAL_GPIO_WritePin(OUTPUT_Y1_GPIO_Port, OUTPUT_Y1_Pin, 0);
+		traffic_light = RED;
+		break;
+	}
 
 }
 /* USER CODE END 0 */
@@ -184,7 +208,7 @@ int main(void)
 	  while(!flag_timer2);
 	  flag_timer2=0;
 
-	  q1();
+	  q2();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
