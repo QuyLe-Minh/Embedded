@@ -1,0 +1,7 @@
+main.c:58:6:q1	8	static
+main.c:65:6:q2	8	static
+main.c:74:6:q3	8	static
+main.c:93:5:main	8	static
+main.c:142:6:SystemClock_Config	88	static
+main.c:187:13:MX_GPIO_Init	48	static
+main.c:239:6:Error_Handler	4	static,ignoring_inline_asm
