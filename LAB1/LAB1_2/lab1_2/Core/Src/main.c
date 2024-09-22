@@ -69,6 +69,14 @@ int c0 = 0;
 int c1 = 0;
 int c2 = 0;
 int cnt = 0;
+int colon = 0;
+int state = 0;
+
+int time_counter = 1430;
+uint8_t count_clock = 0;
+uint8_t blink_counter = 0;
+int hour = 0;
+int minute = 0;
 
 uint8_t state_y0;
 uint8_t state_y1;
@@ -164,6 +172,28 @@ void q2(){
 	}
 
 }
+
+void colong(){
+	colon = (colon+ 1)%10;
+	if(colon==0) {
+		led7_SetColon(state^=1);
+	}
+}
+
+void q4(){
+	count_clock = (count_clock+ 1)%(1000/50);
+	if(count_clock == 0){
+		time_counter++;
+		time_counter %= 1440;
+		minute = time_counter%60;
+		hour = time_counter/60;
+		led7_SetDigit(minute%10, 3, 0);
+		led7_SetDigit(minute/10, 2, 0);
+		led7_SetDigit(hour%10, 1, 0);
+		led7_SetDigit(hour/10, 0, 0);
+	}
+	colong();
+}
 /* USER CODE END 0 */
 
 /**
@@ -208,7 +238,9 @@ int main(void)
 	  while(!flag_timer2);
 	  flag_timer2=0;
 
+	  q4();
 	  q2();
+//	  test_colon();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -415,8 +447,8 @@ void system_init(){
 	  setTimer2(50);
 
 
-//	  setTimer1(2); //100hz
-	  setTimer1(250); //1hz
+	  setTimer1(2); //100hz
+//	  setTimer1(250); //1hz
 //	  setTimer1(10); //25hz
 }
 /* USER CODE END 4 */
